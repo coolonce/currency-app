@@ -2,6 +2,7 @@
 
 namespace App\Workers;
 
+use App\Constans\CacheConstants;
 use App\Interfaces\CacheInterface;
 use App\Interfaces\MessageBrokerInterface;
 use PhpAmqpLib\Connection\AMQPStreamConnection;
@@ -25,7 +26,8 @@ class Worker
             $data        = $messageData['data'];
             echo "Processing message with delivery tag: " . $msg->getDeliveryTag() . PHP_EOL;
             try {
-                $this->cache->set($date, json_encode($data));
+                $cacheKey = CacheConstants::KEY_CURRENCY_VALUES . $date;
+                $this->cache->set($cacheKey, json_encode($data));
             } catch (\Throwable $t) {
                 echo "Error processing message for {$date}: " . $t->getMessage() . PHP_EOL;
                 $msg->nack();

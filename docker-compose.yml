@@ -36,22 +36,34 @@ services:
       - "15672:15672"     # порт для интерфейса управления
     networks:
       - app-network
-  worker:
-    build:
-      context: .
-    volumes:
-      - './app:/var/www/app'
-    depends_on:
-      - redis
-      - rabbitmq
-    environment:
-      REDIS_HOST: redis
-      REDIS_PORT: 6379
-      RABBITMQ_HOST: rabbitmq
-      RABBITMQ_PORT: 5672
-    command: php app/Commands/ConsumeCurrencyRates.php
-    networks:
-      - app-network
+#  worker:
+#    build:
+#      context: .
+#    depends_on:
+#      - redis
+#      - rabbitmq
+#    environment:
+#      REDIS_HOST: redis
+#      REDIS_PORT: 6379
+#      RABBITMQ_HOST: rabbitmq
+#      RABBITMQ_PORT: 5672
+#    command: php app/run_worker.php
+#    networks:
+#      - app-network
+#  worker:
+#    build:
+#      context: .
+#    depends_on:
+#      - redis
+#      - rabbitmq
+#    environment:
+#      REDIS_HOST: redis
+#      REDIS_PORT: 6379
+#      RABBITMQ_HOST: rabbitmq
+#      RABBITMQ_PORT: 5672
+#    command: php app/run_fetcher.php 180
+#    networks:
+#      - app-network
 networks:
   app-network:
     driver: bridge

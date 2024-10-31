@@ -12,6 +12,6 @@ ServerRequestCreatorFactory::setSlimHttpDecoratorsAutomaticDetection(false);
 
 $app = AppFactory::create();
 
-registerRoutes($app);
+registerRoutes($app, $container);
 
 $app->run();

@@ -6,10 +6,26 @@ use Psr\Http\Message\ServerRequestInterface as Request;
 
 class CurrencyRequestValidate
 {
-    public static function validate(Request $request): bool
+    private static array $requiredParams = ['date', 'currency'];
+
+    public static function validate(Request $request): array
     {
         $queryParams = $request->getQueryParams();
 
-        return !empty($queryParams['date']) && !empty($queryParams['currency']) && !empty($queryParams['baseCurrency']);
+        $isValid = !empty($queryParams['date']) &&
+            !empty($queryParams['currency']);
+
+        if ($isValid) {
+            return [$isValid, []];
+        }
+
+        $missingParams = [];
+        foreach (self::$requiredParams as $param) {
+            if (!isset($params[$param])) {
+                $missingParams[] = $param;
+            }
+        }
+
+        return [$isValid, $missingParams];
     }
 }
