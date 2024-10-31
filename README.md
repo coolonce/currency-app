@@ -37,7 +37,7 @@
 
 2. **Запустите worker для обновления и обработки данных**:
    ```bash
-   docker-compose exec app php app/run_worker
+   docker-compose exec app php app/run_worker.php
    ```
 
 После выполнения этих команд база данных будет заполнена актуальными курсами валют, и API будет готов к обработке запросов.
@@ -47,7 +47,7 @@
 Теперь вы можете отправлять запросы на веб-сервер для получения информации о курсе. Пример запроса:
 
 ```
-GET http://localhost:4545?date=29.10.2024&currency=EUR&baseCurrency=USD
+GET http://localhost:4545/currency?date=29.10.2024&currency=EUR&baseCurrency=USD
 ```
 
 ### Пример ответа
