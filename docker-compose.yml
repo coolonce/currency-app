@@ -1,0 +1,57 @@
+version: '3.8'
+
+services:
+  app:
+    build:
+      context: .
+    volumes:
+      - './app:/var/www/app'
+      - './composer.json:/var/www/composer.json'
+    depends_on:
+      - redis
+      - rabbitmq
+    environment:
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      RABBITMQ_HOST: rabbitmq
+      RABBITMQ_PORT: 5672
+    command: ["./wait-for-it.sh", "rabbitmq:5672", "--", "php", "-S", "0.0.0.0:8000", "-t", "public"]
+    ports:
+      - "4545:8000"
+    networks:
+      - app-network
+  redis:
+    image: "redis:alpine"
+    ports:
+      - "6379:6379"
+    networks:
+      - app-network
+  rabbitmq:
+    image: "rabbitmq:3-management"
+    environment:
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
+    ports:
+      - "5672:5672"       # порт для обмена сообщениями
+      - "15672:15672"     # порт для интерфейса управления
+    networks:
+      - app-network
+  worker:
+    build:
+      context: .
+    volumes:
+      - './app:/var/www/app'
+    depends_on:
+      - redis
+      - rabbitmq
+    environment:
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      RABBITMQ_HOST: rabbitmq
+      RABBITMQ_PORT: 5672
+    command: php app/Commands/ConsumeCurrencyRates.php
+    networks:
+      - app-network
+networks:
+  app-network:
+    driver: bridge
