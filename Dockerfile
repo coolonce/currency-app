@@ -22,4 +22,4 @@ RUN chmod +x /var/www/wait-for-it.sh
 
 RUN composer install
 
-CMD ["php", "app/index.php"]
+CMD ["php", "public/index.php"]
