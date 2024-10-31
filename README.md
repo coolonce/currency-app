@@ -1,5 +1,3 @@
-Вот пример оформления `README.md` для GitHub с инструкциями по запуску проекта:
-
 # Currency Exchange Rate API
 
 ## Описание
