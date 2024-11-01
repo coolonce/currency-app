@@ -8,9 +8,12 @@ use PhpAmqpLib\Message\AMQPMessage;
 
 class RabbitMQMessageBroker implements MessageBrokerInterface
 {
+    private const MAX_RETRIES = 3;
+    private const INITIAL_DELAY_MS = 100;
     private $connection;
     private $channel;
     private $queueName;
+
 
     public function __construct($host, $port, $user, $password, $queueName)
     {
@@ -30,12 +33,22 @@ class RabbitMQMessageBroker implements MessageBrokerInterface
             'delivery_mode' => AMQPMessage::DELIVERY_MODE_PERSISTENT
         ]);
 
+        $attempt = 0;
         try {
-            // Отправка сообщения в очередь
             $this->channel->basic_publish($amqpMessage, '', $this->queueName);
             echo "Message sent to queue: {$this->queueName}" . PHP_EOL;
+            return;
         } catch (\Exception $e) {
-            echo "Failed to send message: " . $e->getMessage() . PHP_EOL;
+            $attempt++;
+            echo "Attempt {$attempt}: Failed to send message - " . $e->getMessage() . PHP_EOL;
+
+            if ($attempt >= self::MAX_RETRIES) {
+                echo "All attempts failed. Logging the message for manual processing." . PHP_EOL;
+                $this->logFailedMessage($message);
+                return;
+            }
+
+            $this->applyBackoffDelay($attempt);
         }
     }
 
@@ -52,5 +65,17 @@ class RabbitMQMessageBroker implements MessageBrokerInterface
     {
         $this->channel->close();
         $this->connection->close();
+    }
+
+    private function applyBackoffDelay(int $attempt): void
+    {
+        //Экспоненциальная задержка.
+        $delayMs = self::INITIAL_DELAY_MS * (2 ** ($attempt - 1));
+        usleep($delayMs * 1000);
+    }
+
+    private function logFailedMessage(string $message): void
+    {
+        file_put_contents('./failed_messages.log', $message . PHP_EOL, FILE_APPEND);
     }
 }
